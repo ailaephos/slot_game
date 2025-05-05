@@ -115,7 +115,7 @@ export class Reel {
             const snappedX = Math.floor(symbol.x / this.symbolSize) * this.symbolSize;
             symbol.x = snappedX;
         }
-
+       
     }
 
     public startSpin(): void {
@@ -126,5 +126,9 @@ export class Reel {
     public stopSpin(): void {
         this.isSpinning = false;
         // The reel will gradually slow down in the update method
+    }
+
+    public isStopped(): boolean {
+        return !this.isSpinning && this.speed === 0;
     }
 }

@@ -26,5 +26,12 @@ export const sound = {
 
         sfx.play();
         console.log(`Playing sound: ${alias}`);
+    },
+    stop: (alias: string): void => {
+        const sfx = sounds[alias];
+        if (sfx) {
+            sfx.stop();
+            console.log(`Stopped sound: ${alias}`);
+        }
     }
 };

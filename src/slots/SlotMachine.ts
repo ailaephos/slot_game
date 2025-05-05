@@ -3,7 +3,7 @@ import 'pixi-spine';
 import { Reel } from './Reel';
 import { sound } from '../utils/sound';
 import { AssetLoader } from '../utils/AssetLoader';
-import {Spine} from "pixi-spine";
+import { Spine } from "pixi-spine";
 
 const REEL_COUNT = 4;
 const SYMBOLS_PER_REEL = 6;
@@ -19,6 +19,7 @@ export class SlotMachine {
     private spinButton: PIXI.Sprite | null = null;
     private frameSpine: Spine | null = null;
     private winAnimation: Spine | null = null;
+    private reelSoundPlaying: boolean = false;
 
     constructor(app: PIXI.Application) {
         this.app = app;
@@ -67,6 +68,17 @@ export class SlotMachine {
         // Update each reel
         for (const reel of this.reels) {
             reel.update(delta);
+
+        }
+
+        //stop reel sound if all reels are stopped
+        if (this.reelSoundPlaying && !this.isSpinning) {
+            const allStopped = this.reels.every(reel => reel.isStopped());
+
+            if (allStopped) {
+                sound.stop('Reel spin');
+                this.reelSoundPlaying = false; 
+            }
         }
     }
 
@@ -74,9 +86,9 @@ export class SlotMachine {
         if (this.isSpinning) return;
 
         this.isSpinning = true;
-
         // Play spin sound
         sound.play('Reel spin');
+        this.reelSoundPlaying = true;
 
         // Disable spin button
         if (this.spinButton) {
