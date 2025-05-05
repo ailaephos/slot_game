@@ -26,25 +26,68 @@ export class Reel {
         this.symbolSize = symbolSize;
         this.symbolCount = symbolCount;
 
-        this.createSymbols();
+        this.createSymbols(symbolCount + 1); // Create one extra symbol for the spinning effect
+        this.createMask();
+
     }
 
-    private createSymbols(): void {
+    private createSymbols(length: number): void {
         // Create symbols for the reel, arranged horizontally
+        for (let i = 0; i < length; i++) {
+            const sprite = this.createRandomSymbol();
+            sprite.x = (i - 1) * this.symbolSize; // Place symbols horizontally
+            sprite.y = 0;
+            this.symbols.push(sprite);
+            this.container.addChild(sprite);
+        }
     }
 
     private createRandomSymbol(): PIXI.Sprite {
-        // TODO:Get a random symbol texture
+             // TODO:Get a random symbol texture
+             const textureName = this.createRandomSymbolTexture();
+             // TODO:Create a sprite with the texture
+             const texture = AssetLoader.getTexture(textureName);
+             const sprite = new PIXI.Sprite(texture);
+     
+             sprite.width = this.symbolSize;
+             sprite.height = this.symbolSize;
+     
+             return sprite;
+    }
 
-        // TODO:Create a sprite with the texture
+    private createRandomSymbolTexture(): string {
 
-        return new PIXI.Sprite();
+        return SYMBOL_TEXTURES[Math.floor(Math.random() * SYMBOL_TEXTURES.length)];
+    }
+
+    private createMask(): void {
+        const mask = new PIXI.Graphics();
+        mask.beginFill(0xffffff);
+        mask.drawRect(0, 0, this.symbolCount * this.symbolSize, this.symbolSize);
+        mask.endFill();
+
+        this.container.addChild(mask);
+        this.container.mask = mask;
+
     }
 
     public update(delta: number): void {
         if (!this.isSpinning && this.speed === 0) return;
 
         // TODO:Move symbols horizontally
+        const totalWidth = this.symbolCount * this.symbolSize;
+
+        for (const symbol of this.symbols) {
+            symbol.x += this.speed * delta;
+
+            if (symbol.x >= totalWidth) {
+                // Replace the symbol with a new random one
+                this.replaceSymbol(symbol);
+
+                // Move the symbol to the left edge of the reel
+                symbol.x -= totalWidth + this.symbolSize;
+            }
+        }
 
         // If we're stopping, slow down the reel
         if (!this.isSpinning && this.speed > 0) {
@@ -58,8 +101,20 @@ export class Reel {
         }
     }
 
+    private replaceSymbol(symbol: PIXI.Sprite): void {
+
+        const textureName = this.createRandomSymbolTexture();
+        symbol.texture = AssetLoader.getTexture(textureName);
+        symbol.width = this.symbolSize;
+        symbol.height = this.symbolSize;
+    }
+
     private snapToGrid(): void {
         // TODO: Snap symbols to horizontal grid positions
+        for (const symbol of this.symbols) {
+            const snappedX = Math.floor(symbol.x / this.symbolSize) * this.symbolSize;
+            symbol.x = snappedX;
+        }
 
     }
 
