@@ -19,7 +19,7 @@ export class SlotMachine {
     private spinButton: PIXI.Sprite | null = null;
     private frameSpine: Spine | null = null;
     private winAnimation: Spine | null = null;
-    private reelSoundPlaying: boolean = false;
+    public reelSoundPlaying: boolean = false;
 
     constructor(app: PIXI.Application) {
         this.app = app;
@@ -185,4 +185,35 @@ export class SlotMachine {
             console.error('Error initializing spine animations:', error);
         }
     }
+
+    public getReels(): Reel[] {
+        return this.reels;
+    }
+
+    public getIsSpinning(): boolean {
+        return this.isSpinning;
+    }
+
+    public getWinAnimation(): Spine | null {
+        return this.winAnimation;
+    }
+
+    public testCheckWin(randomWin: boolean): void {
+       
+       if (randomWin) {
+           sound.play('win');
+           console.log('Winner!');
+
+           if (this.winAnimation) {
+               // TODO: Play the win animation found in "big-boom-h" spine
+               this.winAnimation.visible = true;
+
+               if (this.winAnimation.state.hasAnimation('start')) {
+                   this.winAnimation.state.setAnimation(0, 'start', false);
+               }
+
+           }
+       }
+    }
+    
 }

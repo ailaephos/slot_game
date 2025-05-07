@@ -55,4 +55,9 @@ export class UI {
     private onButtonOut(event: PIXI.FederatedPointerEvent): void {
         (event.currentTarget as PIXI.Sprite).scale.set(1.0);
     }
+
+    public getSpinButton(): PIXI.Sprite | null {
+        return this.spinButton;
+    }
+    
 }

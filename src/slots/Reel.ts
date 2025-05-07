@@ -19,13 +19,15 @@ export class Reel {
     private symbolCount: number;
     private speed: number = 0;
     private isSpinning: boolean = false;
+    private replaceSymbolFn: (symbol: PIXI.Sprite) => void;
 
-    constructor(symbolCount: number, symbolSize: number) {
+
+    constructor(symbolCount: number, symbolSize: number, replaceSymbolFn?: (symbol: PIXI.Sprite) => void) {
         this.container = new PIXI.Container();
         this.symbols = [];
         this.symbolSize = symbolSize;
         this.symbolCount = symbolCount;
-
+        this.replaceSymbolFn = replaceSymbolFn || this.defaultReplaceSymbol;
         this.createSymbols(symbolCount + 1); // Create one extra symbol for the spinning effect
         this.createMask();
 
@@ -43,16 +45,16 @@ export class Reel {
     }
 
     private createRandomSymbol(): PIXI.Sprite {
-             // TODO:Get a random symbol texture
-             const textureName = this.createRandomSymbolTexture();
-             // TODO:Create a sprite with the texture
-             const texture = AssetLoader.getTexture(textureName);
-             const sprite = new PIXI.Sprite(texture);
-     
-             sprite.width = this.symbolSize;
-             sprite.height = this.symbolSize;
-     
-             return sprite;
+        // TODO:Get a random symbol texture
+        const textureName = this.createRandomSymbolTexture();
+        // TODO:Create a sprite with the texture
+        const texture = AssetLoader.getTexture(textureName);
+        const sprite = new PIXI.Sprite(texture);
+
+        sprite.width = this.symbolSize;
+        sprite.height = this.symbolSize;
+
+        return sprite;
     }
 
     private createRandomSymbolTexture(): string {
@@ -72,6 +74,8 @@ export class Reel {
     }
 
     public update(delta: number): void {
+
+
         if (!this.isSpinning && this.speed === 0) return;
 
         // TODO:Move symbols horizontally
@@ -82,7 +86,7 @@ export class Reel {
 
             if (symbol.x >= totalWidth) {
                 // Replace the symbol with a new random one
-                this.replaceSymbol(symbol);
+                this.replaceSymbolFn(symbol);
 
                 // Move the symbol to the left edge of the reel
                 symbol.x -= totalWidth + this.symbolSize;
@@ -99,23 +103,24 @@ export class Reel {
                 this.snapToGrid();
             }
         }
+
     }
 
-    private replaceSymbol(symbol: PIXI.Sprite): void {
 
+    private defaultReplaceSymbol(symbol: PIXI.Sprite): void {
         const textureName = this.createRandomSymbolTexture();
         symbol.texture = AssetLoader.getTexture(textureName);
         symbol.width = this.symbolSize;
         symbol.height = this.symbolSize;
     }
 
+
     private snapToGrid(): void {
         // TODO: Snap symbols to horizontal grid positions
         for (const symbol of this.symbols) {
             const snappedX = Math.floor(symbol.x / this.symbolSize) * this.symbolSize;
-            symbol.x = snappedX;
+            symbol.x = snappedX;;
         }
-       
     }
 
     public startSpin(): void {
@@ -129,6 +134,32 @@ export class Reel {
     }
 
     public isStopped(): boolean {
-        return !this.isSpinning && this.speed === 0;
+        return !this.isSpinning && this.speed < 0.1;
     }
+
+
+    public getVisibleSymbols(): PIXI.Sprite[] {
+        const visibleStart = 0;
+        const visibleEnd = this.symbolCount * this.symbolSize;
+
+        const visibleSymbols = this.symbols.filter(symbol =>
+            symbol.x + symbol.width > visibleStart &&
+            symbol.x < visibleEnd
+        );
+
+        // Sort the visible symbols by their x position in ascending order
+        visibleSymbols.sort((a, b) => a.x - b.x);
+
+        return visibleSymbols;
+    }
+
+    public getSymbolSize(): number {
+        return this.symbolSize;
+    }
+    public getSymbolCount(): number {
+        return this.symbolCount;
+    }
+
+
+
 }
