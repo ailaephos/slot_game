@@ -119,7 +119,7 @@ export class Reel {
         // TODO: Snap symbols to horizontal grid positions
         for (const symbol of this.symbols) {
             const snappedX = Math.floor(symbol.x / this.symbolSize) * this.symbolSize;
-            symbol.x = snappedX;;
+            symbol.x = snappedX + 456;
         }
     }
 
